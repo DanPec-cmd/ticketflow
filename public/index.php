@@ -4,6 +4,8 @@
 // Dodano da mi prikazuje sve greške, maknuti prije produkcije!!!
 ini_set('display_errors', 1); error_reporting(E_ALL);
 
+session_start();
+
 // Autoloader
 spl_autoload_register(function ($class) {
     // Ako se bude proširivalo da php i ja znamo gdje je sve
@@ -29,6 +31,11 @@ $router->add('GET', '/tickets/create', 'TicketController', 'create');
 $router->add('POST', '/tickets/store', 'TicketController', 'store');
 $router->add('GET', '/ticket', 'TicketController', 'show');
 $router->add('POST', '/ticket/reply', 'TicketController', 'addReply');
+
+//Login rute 
+$router->add('GET', '/login', 'AuthController', 'showLoginForm');
+$router->add('POST', '/login/submit', 'AuthController', 'login');
+$router->add('GET', '/logout', 'AuthController', 'logout');
 
 
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

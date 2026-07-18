@@ -3,35 +3,44 @@
 
 class TicketController {
     
-    // Trebam $tickets u view-u (GET /)
+    // Konstruktor osigurava da su samo prijavljeni korisnici unutar aplikacije
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /login');
+            exit;
+        }
+    }
+
+    // Prikaz svih ticketa
     public function index() {
         $ticketModel = new Ticket();
-        $tickets = $ticketModel->getAll(); 
+        $tickets = $ticketModel->getAll();
         
         require_once '../src/Views/list.php';
     }
 
-    // Prikaz forme za novi ticket (GET /tickets/create)
+    // Prikaz forme za novi ticket
     public function create() {
         require_once '../src/Views/create.php';
     }
 
-    // Spremanje novog ticketa u bazu (POST /tickets/store)
+    // Spremanje novog ticketa
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Osnovna sanitizacija unosa da nekome ne bi nešto palo na pamet
             $title = htmlspecialchars(trim($_POST['title'] ?? ''));
             $description = htmlspecialchars(trim($_POST['description'] ?? ''));
             
-            // ID 1 je zaharkodiran jer sam ga ručno unio u bazu
-            $userId = 1; 
+            // Uzimamo ID iz sesije, ne hardkodiramo više
+            $userId = $_SESSION['user_id']; 
 
             if (!empty($title) && !empty($description)) {
                 $ticketModel = new Ticket();
                 $ticketModel->create($userId, $title, $description);
             }
-            
-            // Post/Redirect/Get  Nakon POST zahtjeva, preusmjeri na GET
             header('Location: /');
             exit;
         }
@@ -59,13 +68,13 @@ class TicketController {
         require_once '../src/Views/show.php';
     }
 
-    // Spremanje odgovora
+    // Spremanje odgovora na ticket
     public function addReply() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ticketId = $_POST['ticket_id'] ?? null;
             $message = htmlspecialchars(trim($_POST['message'] ?? ''));
             $status = $_POST['status'] ?? 'open';
-            $userId = 1; // Opet koristimo našeg testnog korisnika
+            $userId = $_SESSION['user_id']; 
 
             if ($ticketId && !empty($message)) {
                 $ticketModel = new Ticket();
