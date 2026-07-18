@@ -3,10 +3,12 @@
 
 class AuthController {
     
+    // Prikaz forme za registraciju
     public function showRegisterForm() {
-    require_once '../src/Views/register.php';
+        require_once '../src/Views/register.php';
     }
 
+    // Obrada podataka iz forme za registraciju
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
@@ -17,7 +19,8 @@ class AuthController {
                 $db = (new Database())->getConnection();
                 $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'client')";
                 $stmt = $db->prepare($sql);
-                // Hashirano sa Bcryptom
+                
+                // Hashiranje lozinke sa Bcryptom
                 $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT)]);
                 
                 header('Location: /login');
@@ -26,19 +29,27 @@ class AuthController {
         }
     }
 
-
     // Prikaz forme za prijavu
     public function showLoginForm() {
-        // Ako je već prijavljen, makni ga s login stranice
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Ako je korisnik već prijavljen, preusmjeri ga na naslovnicu
         if (isset($_SESSION['user_id'])) {
             header('Location: /');
             exit;
         }
+        
         require_once '../src/Views/login.php';
     }
 
-    // Obrada podataka iz forme
+    // Obrada podataka iz forme za prijavu
     public function login() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
@@ -51,20 +62,25 @@ class AuthController {
                 // Uspješna prijava: spremamo podatke u sesiju
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_role'] = $user['role'];
+                $_SESSION['user_role'] = $user['role']; // pm, agent, ili client
                 
                 header('Location: /');
                 exit;
             }
 
-            // Ako prijava ne uspije, vraćamo ga na formu s greškom
+            // Ako prijava ne uspije, proslijedi grešku u View
             $error = "Pogrešan email ili lozinka.";
             require_once '../src/Views/login.php';
         }
     }
 
-    // Odjava
+    // Odjava korisnika
     public function logout() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Uništavamo sesiju i preusmjeravamo na login
         session_destroy();
         header('Location: /login');
         exit;

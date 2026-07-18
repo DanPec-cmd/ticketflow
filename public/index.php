@@ -25,21 +25,23 @@ spl_autoload_register(function ($class) {
 
 $router = new Router();
 
-//Rute se nalaze ovdje
+// Rute se nalaze ovdje
 $router->add('GET', '/', 'TicketController', 'index');
 $router->add('GET', '/tickets/create', 'TicketController', 'create');
 $router->add('POST', '/tickets/store', 'TicketController', 'store');
 $router->add('GET', '/ticket', 'TicketController', 'show');
 $router->add('POST', '/ticket/reply', 'TicketController', 'addReply');
 
-//Login rute 
+// Login rute 
 $router->add('GET', '/login', 'AuthController', 'showLoginForm');
 $router->add('POST', '/login/submit', 'AuthController', 'login');
 $router->add('GET', '/logout', 'AuthController', 'logout');
 
-//Kreiranje novog korisnika
+// Kreiranje novog korisnika
 $router->add('GET', '/register', 'AuthController', 'showRegisterForm');
 $router->add('POST', '/register/submit', 'AuthController', 'register');
 
+// Dodjeljivanje ticketa (PM akcija)
+$router->add('POST', '/ticket/assign', 'TicketController', 'assign');
 
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

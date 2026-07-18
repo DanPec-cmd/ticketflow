@@ -9,14 +9,45 @@ class Ticket {
         $this->db = (new Database())->getConnection();
     }
 
-    public function getAll() {
+    public function getAll($userId = null, $role = 'client') {
         $sql = "SELECT tickets.*, users.name as user_name 
                 FROM tickets 
-                JOIN users ON tickets.user_id = users.id 
-                ORDER BY tickets.created_at DESC";
-                
-        $stmt = $this->db->query($sql);
+                JOIN users ON tickets.user_id = users.id";
+
+        if ($role === 'pm' || $role === 'admin') {
+            // PM i Admin vide apsolutno sve tickete
+            $sql .= " ORDER BY tickets.created_at DESC";
+            $stmt = $this->db->query($sql);
+            
+        } elseif ($role === 'agent') {
+            // Agenti vide isključivo tickete koji su dodijeljeni njima
+            $sql .= " WHERE tickets.assigned_to = ?";
+            $sql .= " ORDER BY tickets.created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$userId]);
+            
+        } else {
+            // Obični korisnici (klijenti) vide samo tickete koje su sami kreirali
+            $sql .= " WHERE tickets.user_id = ?";
+            $sql .= " ORDER BY tickets.created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$userId]);
+        }
+        
         return $stmt->fetchAll();
+    }
+
+    // Metoda za dodjeljivanje agenta
+    public function assignAgent($ticketId, $agentId) {
+        $sql = "UPDATE tickets SET assigned_to = ? WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$agentId, $ticketId]);
+    }
+
+    // Metoda za dohvat svih agenata
+    public function getAgents() {
+        $sql = "SELECT id, name FROM users WHERE role = 'agent'";
+        return $this->db->query($sql)->fetchAll();
     }
 
     public function create($userId, $title, $description) {
@@ -73,5 +104,3 @@ class Ticket {
         }
     }
 }
-
-
