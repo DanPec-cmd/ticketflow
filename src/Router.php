@@ -4,20 +4,39 @@
 class Router {
     private $routes = [];
 
-    public function add($method, $uri, $controller, $action) {
-        $this->routes[] = compact('method', 'uri', 'controller', 'action');
+    public function add($method, $path, $controller, $action) {
+        $pattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([^/]+)', $path);
+        $regex = '#^' . $pattern . '/?$#';
+
+        $this->routes[] = [
+            'method'     => $method,
+            'regex'      => $regex,
+            'controller' => $controller,
+            'action'     => $action
+        ];
     }
 
     public function dispatch($requestUri, $requestMethod) {
         $uri = parse_url($requestUri, PHP_URL_PATH);
 
         foreach ($this->routes as $route) {
-            if ($route['uri'] === $uri && $route['method'] === $requestMethod) {
-                $controllerName = $route['controller'];
-                $action = $route['action'];
+       
+            if ($route['method'] === $requestMethod && preg_match($route['regex'], $uri, $matches)) {
                 
-                $controller = new $controllerName();
-                return $controller->$action();
+             
+                array_shift($matches);
+
+                $controllerName = $route['controller'];
+                $actionName = $route['action'];
+
+                if (class_exists($controllerName)) {
+                    $controller = new $controllerName();
+                    
+                    if (method_exists($controller, $actionName)) {
+     
+                        return call_user_func_array([$controller, $actionName], $matches);
+                    }
+                }
             }
         }
         
