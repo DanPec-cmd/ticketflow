@@ -11,12 +11,20 @@
 
     <div class="max-w-3xl mx-auto">
         
-        <!-- Poruka o uspjehu (Flash message) -->
+        <!-- Poruka o uspjehu -->
         <?php if (isset($_SESSION['message'])): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm">
                 <?= htmlspecialchars($_SESSION['message']) ?>
             </div>
-            <?php unset($_SESSION['message']); // Brišemo poruku da se ne prikazuje nakon osvježavanja ?>
+            <?php unset($_SESSION['message']); ?>
+        <?php endif; ?>
+
+        <!-- Poruka o grešci (Validacija/CSRF) -->
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm">
+                <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
         <a href="/" class="text-blue-600 hover:underline mb-4 inline-block font-medium">← Natrag na popis</a>
@@ -25,6 +33,8 @@
         <?php if ($_SESSION['user_role'] === 'pm'): ?>
             <div class="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-200 shadow-sm">
                 <form action="/ticket/assign" method="POST" class="flex flex-col sm:flex-row sm:items-end gap-4">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                     <input type="hidden" name="ticket_id" value="<?= $ticket['id'] ?>">
                     
                     <div class="flex-1">
@@ -48,14 +58,13 @@
             </div>
         <?php endif; ?>
 
-        <!-- Glavni Ticket -->
+        <!-- Glavni Ticket (ostatak html-a ostaje isti do forme za odgovor) -->
         <div class="bg-white p-6 shadow-md rounded-lg mb-8 border-l-4 <?= $ticket['status'] === 'closed' ? 'border-green-500' : 'border-blue-500' ?>">
             <div class="flex justify-between items-start mb-4">
                 <h1 class="text-2xl font-bold text-gray-800"><?= htmlspecialchars($ticket['title']) ?></h1>
                 
                 <?php 
-                // Logika za boje statusa
-                $statusClass = 'bg-blue-100 text-blue-800'; // Default: in_progress
+                $statusClass = 'bg-blue-100 text-blue-800';
                 if ($ticket['status'] === 'open') {
                     $statusClass = 'bg-yellow-100 text-yellow-800';
                 } elseif ($ticket['status'] === 'closed') {
@@ -77,7 +86,6 @@
             </div>
         </div>
 
-        <!-- Odgovori -->
         <h3 class="text-xl font-bold text-gray-800 mb-4">Komentari i Odgovori</h3>
         <div class="space-y-4 mb-8">
             <?php if (!empty($replies)): ?>
@@ -103,6 +111,8 @@
         <?php if ($ticket['status'] !== 'closed'): ?>
             <div class="bg-white p-6 shadow-md rounded-lg border border-gray-200">
                 <form action="/ticket/reply" method="POST">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                     <input type="hidden" name="ticket_id" value="<?= $ticket['id'] ?>">
                     
                     <div class="mb-4">
