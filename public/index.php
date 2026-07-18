@@ -37,5 +37,9 @@ $router->add('GET', '/login', 'AuthController', 'showLoginForm');
 $router->add('POST', '/login/submit', 'AuthController', 'login');
 $router->add('GET', '/logout', 'AuthController', 'logout');
 
+//Kreiranje novog korisnika
+$router->add('GET', '/register', 'AuthController', 'showRegisterForm');
+$router->add('POST', '/register/submit', 'AuthController', 'register');
+
 
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

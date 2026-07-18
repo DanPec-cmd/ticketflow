@@ -3,6 +3,30 @@
 
 class AuthController {
     
+    public function showRegisterForm() {
+    require_once '../src/Views/register.php';
+    }
+
+    public function register() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+
+            if (!empty($name) && !empty($email) && !empty($password)) {
+                $db = (new Database())->getConnection();
+                $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'client')";
+                $stmt = $db->prepare($sql);
+                // Hashirano sa Bcryptom
+                $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT)]);
+                
+                header('Location: /login');
+                exit;
+            }
+        }
+    }
+
+
     // Prikaz forme za prijavu
     public function showLoginForm() {
         // Ako je već prijavljen, makni ga s login stranice
