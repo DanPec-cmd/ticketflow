@@ -1,7 +1,5 @@
 <?php
-namespace App\Models;
-
-use PDO;
+// Datoteka: src/Models/Ticket.php
 
 class Ticket {
     private PDO $db;
@@ -98,7 +96,7 @@ class Ticket {
 
             $this->db->commit();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             // U pravoj aplikaciji ovdje bismo logirali grešku (npr. error_log)
             return false;
