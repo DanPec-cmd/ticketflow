@@ -1,6 +1,8 @@
 <?php
 // Datoteka: src/Models/Database.php
-
+namespace App\Models;
+use PDO;
+use PDOException;
 class Database {
     private $host;
     private $db_name;

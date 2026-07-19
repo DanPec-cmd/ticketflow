@@ -1,5 +1,8 @@
 <?php
 // Datoteka: src/Models/User.php
+namespace App\Models;
+
+use PDO; 
 
 class User {
     private $db;
@@ -13,6 +16,6 @@ class User {
         $sql = "SELECT * FROM users WHERE email = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$email]);
-        return $stmt->fetch(PDO::FETCH_ASSOC); // Preporučeno dodati PDO::FETCH_ASSOC
+        return $stmt->fetch(PDO::FETCH_ASSOC); 
     }
 }

@@ -1,5 +1,11 @@
 <?php
 // Datoteka: src/Controllers/TicketController.php
+namespace App\Controllers;
+
+use App\Models\Ticket; 
+use App\Core\AuthGuard;
+use App\Core\Validator;
+use Exception;
 
 class TicketController {
     
@@ -10,6 +16,7 @@ class TicketController {
         $this->ticketModel = $ticketModel;
         
         AuthGuard::requireLogin();
+        // Generiranje tokena ostavljamo ovdje kako bi ga Views (HTML forme) mogle ispisati
         $_SESSION['csrf_token'] = $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32));
     }
 
@@ -24,22 +31,16 @@ class TicketController {
 
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                $_SESSION['error'] = "Sigurnosna greška: Neispravan token. Pokušajte ponovno.";
-                header('Location: /tickets/create');
-                exit;
-            }
-
             $title = trim($_POST['title'] ?? '');
             $description = trim($_POST['description'] ?? '');
-            
-            if (strlen($title) < 5 || strlen($title) > 255) {
+
+            if (!Validator::string($title, 5, 255)) {
                 $_SESSION['error'] = "Naslov mora biti između 5 i 255 znakova.";
                 header('Location: /tickets/create');
                 exit;
             }
 
-            if (strlen($description) < 10) {
+            if (!Validator::string($description, 10)) {
                 $_SESSION['error'] = "Opis problema mora imati minimalno 10 znakova.";
                 header('Location: /tickets/create');
                 exit;
@@ -72,7 +73,6 @@ class TicketController {
 
         $replies = $this->ticketModel->getReplies($id);
         
-        // KLJUČNO ZA DEPENDENCY INJECTION: Kontroler dohvaća agente i šalje ih u View
         $agents = [];
         if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'pm') {
             $agents = $this->ticketModel->getAgents();
@@ -84,17 +84,10 @@ class TicketController {
     public function addReply() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ticketId = $_POST['ticket_id'] ?? null;
-            
-            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                $_SESSION['error'] = "Sigurnosna greška: Neispravan token. Pokušajte ponovno.";
-                header("Location: /ticket/" . $ticketId);
-                exit;
-            }
-
             $message = trim($_POST['message'] ?? '');
             $status = $_POST['status'] ?? 'open';
             
-            if (strlen($message) < 2) {
+        if (!Validator::string($message, 2)) {
                 $_SESSION['error'] = "Odgovor ne može biti prazan (minimalno 2 znaka).";
                 header("Location: /ticket/" . $ticketId);
                 exit;
@@ -113,14 +106,8 @@ class TicketController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ticket_id = $_POST['ticket_id'] ?? null;
-            
-            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                $_SESSION['error'] = "Greška: Neispravan sigurnosni token.";
-                header("Location: /ticket/" . $ticket_id);
-                exit;
-            }
-
             $agent_id = $_POST['agent_id'] ?? null;
+            
             if ($ticket_id) {
                 $agent_id_db = ($agent_id === '') ? null : $agent_id;
                 
@@ -130,6 +117,7 @@ class TicketController {
                     $_SESSION['error'] = "Greška prilikom dodjeljivanja agenta.";
                 }
             }
+            
             header("Location: /ticket/" . $ticket_id);
             exit;
         }

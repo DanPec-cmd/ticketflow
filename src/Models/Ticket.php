@@ -1,6 +1,7 @@
 <?php
 // Datoteka: src/Models/Ticket.php
-
+namespace App\Models;
+use PDO;
 class Ticket {
     private PDO $db;
 

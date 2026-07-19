@@ -1,12 +1,17 @@
 <?php
 // Datoteka: src/Controllers/AuthController.php
+namespace App\Controllers;
+
+use App\Models\User;
+use App\Core\AuthGuard;
+use App\Core\Validator;
+use Exception;
 
 class AuthController {
     
     private User $userModel;
     private $db;
 
-    // Dependency Injection: Injectamo User model i Database konekciju
     public function __construct(User $userModel, $dbConnection) {
         $this->userModel = $userModel;
         $this->db = $dbConnection;
@@ -22,21 +27,15 @@ class AuthController {
         AuthGuard::requireGuest();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                $error = "Neispravan sigurnosni token. Osvježite stranicu i pokušajte ponovno.";
-                require_once '../src/Views/register.php';
-                return;
-            }
-
             $name = trim($_POST['name'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
 
-            if (strlen($name) < 2 || strlen($name) > 100) {
+            if (!Validator::string($name, 2, 100)) {
                 $error = "Ime mora sadržavati između 2 i 100 znakova.";
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            } elseif (!Validator::email($email)) {
                 $error = "Neispravan format email adrese.";
-            } elseif (strlen($password) < 6) {
+            } elseif (!Validator::string($password, 6)) {
                 $error = "Lozinka mora imati barem 6 znakova.";
             }
 
@@ -45,7 +44,6 @@ class AuthController {
                 return;
             }
             
-            // Koristimo injectani DB
             $stmtCheck = $this->db->prepare("SELECT id FROM users WHERE email = ?");
             $stmtCheck->execute([$email]);
             if ($stmtCheck->fetch()) {
@@ -73,16 +71,9 @@ class AuthController {
         AuthGuard::requireGuest();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                $error = "Neispravan sigurnosni token. Pokušajte ponovno.";
-                require_once '../src/Views/login.php';
-                return;
-            }
-
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
 
-            // Koristimo injectani model
             $user = $this->userModel->findByEmail($email);
 
             if ($user && password_verify($password, $user['password'])) {
@@ -100,7 +91,9 @@ class AuthController {
     }
 
     public function logout() {
-        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+        if (session_status() === PHP_SESSION_NONE) { 
+            session_start(); 
+        }
         session_destroy();
         header('Location: /login');
         exit;

@@ -1,6 +1,6 @@
 <?php
 // Datoteka: src/Core/Container.php
-
+namespace App\Core;
 class Container {
     private array $bindings = [];
     private array $instances = [];

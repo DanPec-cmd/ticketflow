@@ -1,6 +1,6 @@
 <?php
 // Datoteka: src/Core/AuthGuard.php
-
+namespace App\Core;
 class AuthGuard {
     
     // Zahtijeva da je korisnik prijavljen

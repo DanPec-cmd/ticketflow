@@ -1,5 +1,8 @@
 <?php
 // Datoteka: src/Router.php
+namespace App;
+
+use App\Core\AuthGuard;
 
 class Router {
     private $routes = [];
@@ -13,11 +16,10 @@ class Router {
             'regex'       => $regex,
             'controller'  => $controller,
             'action'      => $action,
-            'middlewares' => $middlewares // Ovdje definiraš npr: ['auth', 'csrf']
+            'middlewares' => $middlewares
         ];
     }
 
-    // Dodan opcionalni parametar $container
     public function dispatch($requestUri, $requestMethod, $container = null) {
         $uri = parse_url($requestUri, PHP_URL_PATH);
         $methodNotAllowed = false;
@@ -46,13 +48,11 @@ class Router {
             }
         }
 
-        // 3. Rukovanje greškama
+        // 3. Rukovanje greškama s profesionalnim UI-jem
         if ($methodNotAllowed) {
-            http_response_code(405);
-            echo "405 - Metoda nije dopuštena";
+            $this->renderError(405, "Metoda nije dopuštena", "Pokušavate pristupiti ruti s pogrešnom HTTP metodom.");
         } else {
-            http_response_code(404);
-            echo "404 - Stranica nije pronađena";
+            $this->renderError(404, "Stranica nije pronađena", "Tražena stranica ne postoji ili je premještena.");
         }
     }
 
@@ -62,10 +62,39 @@ class Router {
         } elseif ($name === 'csrf') {
             // Centralizirana CSRF provjera
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                    die("CSRF token neispravan.");
+                $sessionToken = $_SESSION['csrf_token'] ?? '';
+                $postToken = $_POST['csrf_token'] ?? '';
+
+                if (empty($sessionToken) || empty($postToken) || !hash_equals($sessionToken, $postToken)) {
+                    // Prekidamo izvršavanje i bacamo lijepu 403 grešku
+                    $this->renderError(403, "Zabranjen pristup", "Vaša sesija je istekla ili je sigurnosni token neispravan. Molimo osvježite stranicu i pokušajte ponovno.");
                 }
             }
         }
+    }
+
+    // Pomoćna metoda za generiranje Tailwind CSS ekrana za greške
+    private function renderError($code, $title, $message) {
+        http_response_code($code);
+        echo "<!DOCTYPE html>
+        <html lang='hr'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>{$code} - {$title}</title>
+            <script src='https://cdn.tailwindcss.com'></script>
+        </head>
+        <body class='bg-slate-100 h-screen flex items-center justify-center p-4'>
+            <div class='bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border-t-4 border-red-500'>
+                <h1 class='text-7xl font-extrabold text-red-500 mb-4'>{$code}</h1>
+                <h2 class='text-2xl font-bold text-slate-800 mb-3'>{$title}</h2>
+                <p class='text-slate-600 mb-8'>{$message}</p>
+                <a href='/' class='inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200'>
+                    Povratak na naslovnicu
+                </a>
+            </div>
+        </body>
+        </html>";
+        exit; // Važno: zaustavlja izvršavanje skripte nakon prikaza greške!
     }
 }
