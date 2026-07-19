@@ -3,7 +3,23 @@
 
 session_start();
 
-// Uključivanje osnovnih klasa (u praksi se ovdje koristi Composer autoloader)
+// 1. UČITAVANJE .ENV DATOTEKE (Ovo omogućuje da Database.php pročita lozinke)
+$envPath = __DIR__ . '/../.env';
+if (file_exists($envPath)) {
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        // Preskoči komentare
+        if (strpos(trim($line), '#') === 0) continue;
+        
+        // Razdvoji ključ i vrijednost i spremi u globalni $_ENV niz
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            $_ENV[trim($name)] = trim($value);
+        }
+    }
+}
+
+// 2. Uključivanje osnovnih klasa
 require_once __DIR__ . '/../src/Core/Container.php';
 require_once __DIR__ . '/../src/Core/AuthGuard.php';
 require_once __DIR__ . '/../src/Models/Database.php';
@@ -12,7 +28,7 @@ require_once __DIR__ . '/../src/Models/Ticket.php';
 require_once __DIR__ . '/../src/Controllers/AuthController.php';
 require_once __DIR__ . '/../src/Controllers/TicketController.php';
 
-// Inicijalizacija Service Containera
+// 3. Inicijalizacija Service Containera
 $container = new Container();
 
 // Registracija zavisnosti (Bindings)
@@ -36,7 +52,7 @@ $container->bind('TicketController', function($c) {
     return new TicketController($c->get('Ticket'));
 });
 
-// Jednostavno rutiranje (Routing)
+// 4. Jednostavno rutiranje (Routing)
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Uklanjanje trailing slasha za čišće rute
