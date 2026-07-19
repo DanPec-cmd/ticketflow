@@ -1,8 +1,5 @@
 <?php
-namespace App\Controllers;
-
-use App\Models\Ticket;
-use App\Core\AuthGuard; // Prilagodi namespace tvom AuthGuardu
+// Datoteka: src/Controllers/TicketController.php
 
 class TicketController {
     
