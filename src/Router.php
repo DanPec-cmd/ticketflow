@@ -17,7 +17,8 @@ class Router {
         ];
     }
 
-    public function dispatch($requestUri, $requestMethod) {
+    // Dodan opcionalni parametar $container
+    public function dispatch($requestUri, $requestMethod, $container = null) {
         $uri = parse_url($requestUri, PHP_URL_PATH);
         $methodNotAllowed = false;
 
@@ -36,7 +37,11 @@ class Router {
 
                 // 2. Izvrši kontroler
                 array_shift($matches);
-                $controller = new $route['controller'](); // Ovdje po potrebi koristi Container
+                
+                // Dohvaćanje kontrolera iz Containera ako postoji, inače standardni 'new'
+                $controllerName = $route['controller'];
+                $controller = $container ? $container->get($controllerName) : new $controllerName(); 
+                
                 return call_user_func_array([$controller, $route['action']], $matches);
             }
         }

@@ -1,12 +1,14 @@
 <?php
-// Datoteka: src/Models/Ticket.php
+namespace App\Models;
+
+use PDO;
 
 class Ticket {
-    private $db;
+    private PDO $db;
 
-    public function __construct() {
-        // Spajanje na bazu
-        $this->db = (new Database())->getConnection();
+    // Konstruktor sada prima PDO konekciju putem Dependency Injection-a
+    public function __construct(PDO $db) {
+        $this->db = $db;
     }
 
     public function getAll($userId = null, $role = 'client') {
@@ -34,7 +36,7 @@ class Ticket {
             $stmt->execute([$userId]);
         }
         
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Metoda za dodjeljivanje agenta
@@ -47,11 +49,10 @@ class Ticket {
     // Metoda za dohvat svih agenata
     public function getAgents() {
         $sql = "SELECT id, name FROM users WHERE role = 'agent'";
-        return $this->db->query($sql)->fetchAll();
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create($userId, $title, $description) {
-        // Fora kako par upitnika spriječi SQL injection
         $sql = "INSERT INTO tickets (user_id, title, description) VALUES (?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$userId, $title, $description]);
@@ -65,7 +66,7 @@ class Ticket {
                 WHERE tickets.id = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Dohvaća sve odgovore za određeni ticket
@@ -77,7 +78,7 @@ class Ticket {
                 ORDER BY replies.created_at ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$ticketId]);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Dodaje odgovor i mijenja status ticketa koristeći TRANSAKCIJU
@@ -99,7 +100,7 @@ class Ticket {
             return true;
         } catch (\Exception $e) {
             $this->db->rollBack();
-            // U pravoj aplikaciji ovdje bismo logirali grešku
+            // U pravoj aplikaciji ovdje bismo logirali grešku (npr. error_log)
             return false;
         }
     }

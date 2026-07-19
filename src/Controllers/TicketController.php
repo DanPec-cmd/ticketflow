@@ -1,11 +1,14 @@
 <?php
-// Datoteka: src/Controllers/TicketController.php
+namespace App\Controllers;
+
+use App\Models\Ticket;
+use App\Core\AuthGuard; // Prilagodi namespace tvom AuthGuardu
 
 class TicketController {
     
     private Ticket $ticketModel;
 
-    // Dependency Injection
+    // Dependency Injection: Prima gotov Ticket model (u koji je već ubačen PDO)
     public function __construct(Ticket $ticketModel) {
         $this->ticketModel = $ticketModel;
         
@@ -13,43 +16,13 @@ class TicketController {
         $_SESSION['csrf_token'] = $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32));
     }
 
-    public function assign() {
-        // Čišća autorizacija koristeći Guard
-        AuthGuard::requireRole('pm');
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ticket_id = $_POST['ticket_id'] ?? null;
-            
-            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                $_SESSION['error'] = "Greška: Neispravan sigurnosni token.";
-                header("Location: /ticket/" . $ticket_id);
-                exit;
-            }
-
-            $agent_id = $_POST['agent_id'] ?? null;
-            if ($ticket_id) {
-                $agent_id_db = ($agent_id === '') ? null : $agent_id;
-                
-                // Koristimo injectani model
-                if ($this->ticketModel->assignAgent($ticket_id, $agent_id_db)) {
-                    $_SESSION['message'] = "Agent je uspješno dodijeljen.";
-                } else {
-                    $_SESSION['error'] = "Greška prilikom dodjeljivanja agenta.";
-                }
-            }
-            header("Location: /ticket/" . $ticket_id);
-            exit;
-        }
-    }
-    
     public function index() {
-        // Koristimo injectani model
         $tickets = $this->ticketModel->getAll($_SESSION['user_id'], $_SESSION['user_role']);
-        require_once '../src/Views/list.php';
+        require_once __DIR__ . '/../Views/list.php';
     }
 
     public function create() {
-        require_once '../src/Views/create.php';
+        require_once __DIR__ . '/../Views/create.php';
     }
 
     public function store() {
@@ -84,7 +57,10 @@ class TicketController {
     }
 
     public function show($id = null) {
-        if (!$id) { header('Location: /'); exit; }
+        if (!$id) { 
+            header('Location: /'); 
+            exit; 
+        }
 
         $ticket = $this->ticketModel->findById($id);
 
@@ -98,7 +74,14 @@ class TicketController {
         }
 
         $replies = $this->ticketModel->getReplies($id);
-        require_once '../src/Views/show.php';
+        
+        // KLJUČNO ZA DEPENDENCY INJECTION: Kontroler dohvaća agente i šalje ih u View
+        $agents = [];
+        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'pm') {
+            $agents = $this->ticketModel->getAgents();
+        }
+
+        require_once __DIR__ . '/../Views/show.php';
     }
 
     public function addReply() {
@@ -124,6 +107,33 @@ class TicketController {
             
             $_SESSION['message'] = "Odgovor je uspješno dodan.";
             header("Location: /ticket/" . $ticketId);
+            exit;
+        }
+    }
+
+    public function assign() {
+        AuthGuard::requireRole('pm');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $ticket_id = $_POST['ticket_id'] ?? null;
+            
+            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+                $_SESSION['error'] = "Greška: Neispravan sigurnosni token.";
+                header("Location: /ticket/" . $ticket_id);
+                exit;
+            }
+
+            $agent_id = $_POST['agent_id'] ?? null;
+            if ($ticket_id) {
+                $agent_id_db = ($agent_id === '') ? null : $agent_id;
+                
+                if ($this->ticketModel->assignAgent($ticket_id, $agent_id_db)) {
+                    $_SESSION['message'] = "Agent je uspješno dodijeljen.";
+                } else {
+                    $_SESSION['error'] = "Greška prilikom dodjeljivanja agenta.";
+                }
+            }
+            header("Location: /ticket/" . $ticket_id);
             exit;
         }
     }

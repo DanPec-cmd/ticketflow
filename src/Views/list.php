@@ -4,28 +4,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticketing Sustav</title>
+    <title>Ticketing Sustav - Popis Ticketa</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8 font-sans">
+<body class="bg-gray-100 p-4 md:p-8 font-sans">
     <div class="max-w-5xl mx-auto">
-        <!-- Header s informacijom o korisniku -->
-        <div class="flex justify-between items-center mb-8">
+        
+        <!-- Header s informacijama o korisniku -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Svi Ticketi</h1>
                 <p class="text-sm text-gray-500 mt-1">
-                    Prijavljeni ste kao: <strong><?= htmlspecialchars($_SESSION['user_name'] ?? 'Korisnik') ?></strong> 
+                    Prijavljeni ste kao: <strong><?= htmlspecialchars($_SESSION['user_name'] ?? 'Korisnik', ENT_QUOTES, 'UTF-8') ?></strong> 
                     (<a href="/logout" class="text-red-500 hover:underline">Odjava</a>)
                 </p>
             </div>
-            <a href="/tickets/create" class="bg-blue-600 text-white px-5 py-2 rounded shadow hover:bg-blue-700 transition">
+            <a href="/tickets/create" class="bg-blue-600 text-white px-5 py-2 rounded shadow hover:bg-blue-700 transition font-medium">
                 + Novi Ticket
             </a>
         </div>
 
         <!-- Tablica s ticketima -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <table class="w-full text-left border-collapse">
+        <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[600px]">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="p-4 text-sm font-semibold text-gray-600">ID</th>
@@ -40,13 +41,16 @@
                         <?php foreach ($tickets as $ticket): ?>
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="p-4">
-                                    <!-- OVDJE JE ISPRAVLJEN LINK -->
-                                    <a href="/ticket/<?= $ticket['id'] ?>" class="text-blue-600 hover:underline font-medium">
-                                        #<?= $ticket['id'] ?>
+                                    <a href="/ticket/<?= urlencode($ticket['id']) ?>" class="text-blue-600 hover:underline font-medium">
+                                        #<?= htmlspecialchars($ticket['id'], ENT_QUOTES, 'UTF-8') ?>
                                     </a>
                                 </td>
-                                <td class="p-4 font-medium text-gray-900"><?= htmlspecialchars($ticket['title']) ?></td>
-                                <td class="p-4 text-gray-700"><?= htmlspecialchars($ticket['user_name']) ?></td>
+                                <td class="p-4 font-medium text-gray-900">
+                                    <?= htmlspecialchars($ticket['title'], ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td class="p-4 text-gray-700">
+                                    <?= htmlspecialchars($ticket['user_name'], ENT_QUOTES, 'UTF-8') ?>
+                                </td>
                                 <td class="p-4">
                                     <?php 
                                     $statusClasses = [
@@ -57,7 +61,7 @@
                                     $class = $statusClasses[$ticket['status']] ?? 'bg-gray-100 text-gray-800';
                                     ?>
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full <?= $class ?>">
-                                        <?= strtoupper($ticket['status']) ?>
+                                        <?= htmlspecialchars(strtoupper($ticket['status']), ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td class="p-4 text-gray-500 text-sm">
