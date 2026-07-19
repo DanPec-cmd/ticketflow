@@ -40,7 +40,8 @@
                         <?php foreach ($tickets as $ticket): ?>
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="p-4">
-                                    <a href="/ticket?id=<?= $ticket['id'] ?>" class="text-blue-600 hover:underline font-medium">
+                                    <!-- OVDJE JE ISPRAVLJEN LINK -->
+                                    <a href="/ticket/<?= $ticket['id'] ?>" class="text-blue-600 hover:underline font-medium">
                                         #<?= $ticket['id'] ?>
                                     </a>
                                 </td>

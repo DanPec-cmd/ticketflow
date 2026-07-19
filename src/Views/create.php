@@ -14,14 +14,14 @@
         <!-- Prikaz greške ako validacija ne prođe -->
         <?php if (isset($_SESSION['error'])): ?>
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm">
-                <?= htmlspecialchars($_SESSION['error']) ?>
+                <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
             </div>
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
         <form action="/tickets/store" method="POST">
             <!-- CSRF Token -->
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
             <div class="mb-5">
                 <label class="block text-gray-700 font-semibold mb-2" for="title">Naslov problema</label>

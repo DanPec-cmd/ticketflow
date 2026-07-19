@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket #<?= htmlspecialchars($ticket['id']) ?></title>
+    <title>Ticket #<?= htmlspecialchars($ticket['id'], ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8 font-sans">
@@ -14,7 +14,7 @@
         <!-- Poruka o uspjehu -->
         <?php if (isset($_SESSION['message'])): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm">
-                <?= htmlspecialchars($_SESSION['message']) ?>
+                <?= htmlspecialchars($_SESSION['message'], ENT_QUOTES, 'UTF-8') ?>
             </div>
             <?php unset($_SESSION['message']); ?>
         <?php endif; ?>
@@ -22,7 +22,7 @@
         <!-- Poruka o grešci (Validacija/CSRF) -->
         <?php if (isset($_SESSION['error'])): ?>
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm">
-                <?= htmlspecialchars($_SESSION['error']) ?>
+                <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
             </div>
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
@@ -34,8 +34,8 @@
             <div class="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-200 shadow-sm">
                 <form action="/ticket/assign" method="POST" class="flex flex-col sm:flex-row sm:items-end gap-4">
                     <!-- CSRF Token -->
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                    <input type="hidden" name="ticket_id" value="<?= $ticket['id'] ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id'], ENT_QUOTES, 'UTF-8') ?>">
                     
                     <div class="flex-1">
                         <label class="block text-sm font-bold text-gray-700 mb-1">Dodijeli ticket agentu:</label>
@@ -44,8 +44,8 @@
                             <?php 
                             $ticketModel = new Ticket();
                             foreach ($ticketModel->getAgents() as $agent): ?>
-                                <option value="<?= $agent['id'] ?>" <?= $ticket['assigned_to'] == $agent['id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($agent['name']) ?>
+                                <option value="<?= htmlspecialchars($agent['id'], ENT_QUOTES, 'UTF-8') ?>" <?= $ticket['assigned_to'] == $agent['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($agent['name'], ENT_QUOTES, 'UTF-8') ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -58,10 +58,10 @@
             </div>
         <?php endif; ?>
 
-        <!-- Glavni Ticket (ostatak html-a ostaje isti do forme za odgovor) -->
+        <!-- Glavni Ticket -->
         <div class="bg-white p-6 shadow-md rounded-lg mb-8 border-l-4 <?= $ticket['status'] === 'closed' ? 'border-green-500' : 'border-blue-500' ?>">
             <div class="flex justify-between items-start mb-4">
-                <h1 class="text-2xl font-bold text-gray-800"><?= htmlspecialchars($ticket['title']) ?></h1>
+                <h1 class="text-2xl font-bold text-gray-800"><?= htmlspecialchars($ticket['title'], ENT_QUOTES, 'UTF-8') ?></h1>
                 
                 <?php 
                 $statusClass = 'bg-blue-100 text-blue-800';
@@ -72,17 +72,17 @@
                 }
                 ?>
                 <span class="px-3 py-1 text-xs font-bold rounded-full uppercase <?= $statusClass ?>">
-                    <?= htmlspecialchars($ticket['status']) ?>
+                    <?= htmlspecialchars($ticket['status'], ENT_QUOTES, 'UTF-8') ?>
                 </span>
             </div>
             
             <p class="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-100">
-                Prijavio: <strong class="text-gray-700"><?= htmlspecialchars($ticket['user_name']) ?></strong> 
-                dana <?= date('d.m.Y \u H:i', strtotime($ticket['created_at'])) ?>
+                Prijavio: <strong class="text-gray-700"><?= htmlspecialchars($ticket['user_name'], ENT_QUOTES, 'UTF-8') ?></strong> 
+                dana <?= htmlspecialchars(date('d.m.Y \u H:i', strtotime($ticket['created_at'])), ENT_QUOTES, 'UTF-8') ?>
             </p>
             
             <div class="text-gray-800 bg-gray-50 p-5 rounded-lg border border-gray-100 whitespace-pre-wrap leading-relaxed">
-                <?= htmlspecialchars($ticket['description']) ?>
+                <?= htmlspecialchars($ticket['description'], ENT_QUOTES, 'UTF-8') ?>
             </div>
         </div>
 
@@ -92,12 +92,12 @@
                 <?php foreach ($replies as $reply): ?>
                     <div class="bg-white p-5 shadow-sm rounded-lg border border-gray-200">
                         <div class="flex justify-between items-center mb-3">
-                            <span class="font-bold text-gray-800"><?= htmlspecialchars($reply['user_name']) ?></span>
+                            <span class="font-bold text-gray-800"><?= htmlspecialchars($reply['user_name'], ENT_QUOTES, 'UTF-8') ?></span>
                             <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                <?= date('d.m.Y H:i', strtotime($reply['created_at'])) ?>
+                                <?= htmlspecialchars(date('d.m.Y H:i', strtotime($reply['created_at'])), ENT_QUOTES, 'UTF-8') ?>
                             </span>
                         </div>
-                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed"><?= htmlspecialchars($reply['message']) ?></p>
+                        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed"><?= htmlspecialchars($reply['message'], ENT_QUOTES, 'UTF-8') ?></p>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -112,8 +112,8 @@
             <div class="bg-white p-6 shadow-md rounded-lg border border-gray-200">
                 <form action="/ticket/reply" method="POST">
                     <!-- CSRF Token -->
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                    <input type="hidden" name="ticket_id" value="<?= $ticket['id'] ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id'], ENT_QUOTES, 'UTF-8') ?>">
                     
                     <div class="mb-4">
                         <label class="block text-gray-800 font-bold mb-2">Vaš odgovor</label>
