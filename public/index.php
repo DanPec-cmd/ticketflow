@@ -77,7 +77,7 @@ $container->bind('Ticket', function($c) {
 
 // 4. Kontroleri ostaju isti, primaju modele iz kontejnera
 $container->bind('AuthController', function($c) {
-    return new AuthController($c->get('User')); // Ako AuthController prima samo User model
+    return new AuthController($c->get('User'), $c->get('Database'));
 });
 $container->bind('TicketController', function($c) {
     return new TicketController($c->get('Ticket'));
@@ -146,7 +146,7 @@ try {
               <body style='text-align: center; padding: 50px; font-family: sans-serif;'>
                 <h1>500</h1>
                 <h3>Došlo je do interne greške na serveru.</h3>
-                <p>Naš tim je obaviješten. Molimo pokušajte ponovno kasnije.</p>
+                <p>Naš tim je obaviješten. Molimo pokušajte ponovno senare.</p>
               </body>
               </html>";
     }
