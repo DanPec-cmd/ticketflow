@@ -103,4 +103,48 @@ class Ticket {
             return false;
         }
     }
+
+    /**
+     * Prebrojava ukupan broj ticketa na koje korisnik ima pravo.
+     */
+    public function getTotalTicketsCount($userId, $role) {
+        if ($role === 'pm' || $role === 'agent') {
+            $stmt = $this->db->query("SELECT COUNT(*) FROM tickets");
+            return $stmt->fetchColumn();
+        } else {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tickets WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            return $stmt->fetchColumn();
+        }
+    }
+
+    /**
+     * Dohvaća tickete za određenu stranicu pomoću LIMIT i OFFSET.
+     */
+    public function getPaginatedTickets($userId, $role, $limit, $offset) {
+        if ($role === 'pm' || $role === 'agent') {
+            $sql = "SELECT t.*, u.name as user_name 
+                    FROM tickets t 
+                    LEFT JOIN users u ON t.user_id = u.id 
+                    ORDER BY t.created_at DESC 
+                    LIMIT :limit OFFSET :offset";
+            $stmt = $this->db->prepare($sql);
+        } else {
+            $sql = "SELECT t.*, u.name as user_name 
+                    FROM tickets t 
+                    LEFT JOIN users u ON t.user_id = u.id 
+                    WHERE t.user_id = :user_id 
+                    ORDER BY t.created_at DESC 
+                    LIMIT :limit OFFSET :offset";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
+        }
+        
+        // PAZI: LIMIT i OFFSET moraju biti vezani kao INTEGER da ne pukne PDO
+        $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

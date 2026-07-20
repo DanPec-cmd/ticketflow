@@ -21,7 +21,30 @@ class TicketController {
     }
 
     public function index() {
-        $tickets = $this->ticketModel->getAll($_SESSION['user_id'], $_SESSION['user_role']);
+        $userId = $_SESSION['user_id'];
+        $userRole = $_SESSION['user_role'];
+
+        // 1. Postavke paginacije
+        $perPage = 10; // Broj ticketa po stranici
+        $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($currentPage < 1) $currentPage = 1;
+
+        $offset = ($currentPage - 1) * $perPage;
+
+        // 2. Dohvati ukupan broj ticketa i izračunaj ukupan broj stranica
+        $totalTickets = $this->ticketModel->getTotalTicketsCount($userId, $userRole);
+        $totalPages = ceil($totalTickets / $perPage);
+
+        // Zaštita: Ako korisnik ručno upiše previsok broj stranice u URL
+        if ($currentPage > $totalPages && $totalPages > 0) {
+            $currentPage = $totalPages;
+            $offset = ($currentPage - 1) * $perPage;
+        }
+
+        // 3. Dohvati samo tickete za trenutnu stranicu
+        $tickets = $this->ticketModel->getPaginatedTickets($userId, $userRole, $perPage, $offset);
+
+        // Proslijedi sve varijable u View
         require_once __DIR__ . '/../Views/list.php';
     }
 
