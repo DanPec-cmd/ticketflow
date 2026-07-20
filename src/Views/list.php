@@ -9,7 +9,13 @@
 </head>
 <body class="bg-gray-100 p-4 md:p-8 font-sans">
     <div class="max-w-5xl mx-auto">
-        
+        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'pm'): ?>
+                    <p class="mt-2">
+                        <a href="/users" class="text-indigo-600 hover:underline font-medium text-sm">
+                            ⚙️ Upravljanje korisnicima (PM)
+                        </a>
+                    </p>
+                <?php endif; ?>
         <!-- Header s informacijama o korisniku -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>

@@ -45,7 +45,7 @@ if ($appEnv === 'development') {
 // ==========================================
 // 4. UKLJUČIVANJE AUTOLOADERA I IMPORT KLASA
 // ==========================================
-// OVO JE NAJVAŽNIJA PROMJENA: Mijenja sve one require_once linije!
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Container;
@@ -54,7 +54,8 @@ use App\Models\User;
 use App\Models\Ticket;
 use App\Controllers\AuthController;
 use App\Controllers\TicketController;
-use App\Router; // Ovisno o tome gdje ti je točno ruter
+use App\Controllers\UserController;
+use App\Router; 
 
 $container = new Container();
 
@@ -81,6 +82,9 @@ $container->bind('AuthController', function($c) {
 $container->bind('TicketController', function($c) {
     return new TicketController($c->get('Ticket'));
 });
+$container->bind('UserController', function($c) {
+    return new UserController($c->get('User'));
+});
 
 // ==========================================
 // 5. RUTIRANJE S CENTRALIZIRANIM TRY/CATCH-om
@@ -101,6 +105,10 @@ try {
     $router->add('GET',  '/tickets/create',  'TicketController', 'create', ['auth']);
     $router->add('POST', '/tickets/store',   'TicketController', 'store',  ['auth', 'csrf']);
     
+    // Upravljanje korisnicima (Uloge)
+    $router->add('GET',  '/users',             'UserController', 'index',      ['auth']);
+    $router->add('POST', '/users/update-role', 'UserController', 'updateRole', ['auth', 'csrf']);
+
     // Akcije na ticketima
     $router->add('POST', '/ticket/reply',    'TicketController', 'addReply', ['auth', 'csrf']);
     $router->add('POST', '/ticket/assign',   'TicketController', 'assign',   ['auth', 'csrf']);
