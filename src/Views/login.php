@@ -11,12 +11,8 @@
     <div class="bg-white p-8 shadow-md rounded-lg w-full max-w-md">
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Ticketing Sustav</h1>
         
-        <!-- Prikaz greške -->
-        <?php if (isset($error)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm" role="alert">
-                <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-        <?php endif; ?>
+        <!-- Prikaz flash poruka (npr. greške kod prijave ili uspješna registracija) -->
+        <?= \App\Core\Flash::display() ?>
 
         <form action="/login/submit" method="POST">
             <!-- CSRF Token -->

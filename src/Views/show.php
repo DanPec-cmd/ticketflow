@@ -11,21 +11,8 @@
 
     <div class="max-w-3xl mx-auto">
         
-        <!-- Poruka o uspjehu -->
-        <?php if (isset($_SESSION['message'])): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm" role="alert">
-                <?= htmlspecialchars($_SESSION['message'], ENT_QUOTES, 'UTF-8') ?>
-            </div>
-            <?php unset($_SESSION['message']); ?>
-        <?php endif; ?>
-
-        <!-- Poruka o grešci (Validacija/CSRF) -->
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm" role="alert">
-                <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
-            </div>
-            <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
+        <!-- Prikaz globalnih flash poruka (uspjeh, greške kod dodjele, odgovora, itd.) -->
+        <?= \App\Core\Flash::display() ?>
 
         <a href="/" class="text-blue-600 hover:underline mb-6 inline-flex items-center font-medium">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -44,7 +31,6 @@
                         <label for="agent_id" class="block text-sm font-bold text-gray-700 mb-1">Dodijeli ticket agentu:</label>
                         <select id="agent_id" name="agent_id" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
                             <option value="">-- Odaberi agenta --</option>
-                            <!-- View sada samo vrti varijablu $agents koju je dobio od kontrolera -->
                             <?php foreach ($agents ?? [] as $agent): ?>
                                 <option value="<?= htmlspecialchars($agent['id'], ENT_QUOTES, 'UTF-8') ?>" <?= $ticket['assigned_to'] == $agent['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($agent['name'], ENT_QUOTES, 'UTF-8') ?>

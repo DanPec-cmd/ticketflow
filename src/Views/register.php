@@ -11,12 +11,8 @@
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
         <h1 class="text-2xl font-bold mb-6 text-gray-800 text-center">Registracija</h1>
         
-        <!-- Prikaz greške -->
-        <?php if (isset($error)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm" role="alert">
-                <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-        <?php endif; ?>
+        <!-- Prikaz flash poruka (npr. greške kod validacije podataka) -->
+        <?= \App\Core\Flash::display() ?>
 
         <form action="/register/submit" method="POST">
             <!-- CSRF Token -->

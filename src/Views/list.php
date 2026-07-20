@@ -9,13 +9,19 @@
 </head>
 <body class="bg-gray-100 p-4 md:p-8 font-sans">
     <div class="max-w-5xl mx-auto">
+        
+        <!-- PM Upravljanje -->
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'pm'): ?>
-                    <p class="mt-2">
-                        <a href="/users" class="text-indigo-600 hover:underline font-medium text-sm">
-                            ⚙️ Upravljanje korisnicima (PM)
-                        </a>
-                    </p>
-                <?php endif; ?>
+            <div class="mb-4">
+                <a href="/users" class="text-indigo-600 hover:underline font-medium text-sm flex items-center gap-1">
+                    ⚙️ Upravljanje korisnicima (PM)
+                </a>
+            </div>
+        <?php endif; ?>
+
+        <!-- Prikaz globalnih flash poruka (npr. Uspješno kreiran ticket) -->
+        <?= \App\Core\Flash::display() ?>
+
         <!-- Header s informacijama o korisniku -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
@@ -83,54 +89,55 @@
                 </tbody>
             </table>
         </div>
+
         <!-- Paginacija -->
-            <?php if (isset($totalPages) && $totalPages > 1): ?>
-                <div class="px-4 py-3 border-t border-gray-200 flex items-center justify-between sm:px-6 bg-gray-50">
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Prikazano <span class="font-medium"><?= $offset + 1 ?></span> do 
-                                <span class="font-medium"><?= min($offset + $perPage, $totalTickets) ?></span> od 
-                                <span class="font-medium"><?= $totalTickets ?></span> ticketa
-                            </p>
-                        </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                
-                                <!-- Gumb 'Prethodna' -->
-                                <?php if ($currentPage > 1): ?>
-                                    <a href="?page=<?= $currentPage - 1 ?>" class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        &laquo; Nazad
-                                    </a>
-                                <?php else: ?>
-                                    <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
-                                        &laquo; Nazad
-                                    </span>
-                                <?php endif; ?>
+        <?php if (isset($totalPages) && $totalPages > 1): ?>
+            <div class="px-4 py-3 border-t border-gray-200 flex items-center justify-between sm:px-6 bg-gray-50 mt-4 rounded-lg shadow-sm">
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Prikazano <span class="font-medium"><?= $offset + 1 ?></span> do 
+                            <span class="font-medium"><?= min($offset + $perPage, $totalTickets) ?></span> od 
+                            <span class="font-medium"><?= $totalTickets ?></span> ticketa
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            
+                            <!-- Gumb 'Prethodna' -->
+                            <?php if ($currentPage > 1): ?>
+                                <a href="?page=<?= $currentPage - 1 ?>" class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    &laquo; Nazad
+                                </a>
+                            <?php else: ?>
+                                <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                    &laquo; Nazad
+                                </span>
+                            <?php endif; ?>
 
-                                <!-- Brojevi stranica -->
-                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                    <a href="?page=<?= $i ?>" class="relative inline-flex items-center px-4 py-2 border <?= $i === $currentPage ? 'border-blue-500 bg-blue-50 text-blue-600 z-10' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50' ?> text-sm font-medium">
-                                        <?= $i ?>
-                                    </a>
-                                <?php endfor; ?>
+                            <!-- Brojevi stranica -->
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <a href="?page=<?= $i ?>" class="relative inline-flex items-center px-4 py-2 border <?= $i === $currentPage ? 'border-blue-500 bg-blue-50 text-blue-600 z-10' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50' ?> text-sm font-medium">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
 
-                                <!-- Gumb 'Sljedeća' -->
-                                <?php if ($currentPage < $totalPages): ?>
-                                    <a href="?page=<?= $currentPage + 1 ?>" class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        Naprijed &raquo;
-                                    </a>
-                                <?php else: ?>
-                                    <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
-                                        Naprijed &raquo;
-                                    </span>
-                                <?php endif; ?>
+                            <!-- Gumb 'Sljedeća' -->
+                            <?php if ($currentPage < $totalPages): ?>
+                                <a href="?page=<?= $currentPage + 1 ?>" class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    Naprijed &raquo;
+                                </a>
+                            <?php else: ?>
+                                <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                    Naprijed &raquo;
+                                </span>
+                            <?php endif; ?>
 
-                            </nav>
-                        </div>
+                        </nav>
                     </div>
                 </div>
-            <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>
